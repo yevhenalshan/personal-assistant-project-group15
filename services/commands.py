@@ -85,7 +85,35 @@ def add_birthday(args, book: AddressBook) -> None:
     else:
         raise BirthdayAlreadyExistsError(str(name))
 
+@input_error    
+def show_birthday(args, book: AddressBook) -> None:
+    if len(args) < 1:
+        raise IndexError
+
+    name, *_ = args
+    record = book.find(name)
+    if record is None:
+        raise KeyError
+    elif record.birthday is None:
+        from services.exceptions import BirthdayNotSetError
+        raise BirthdayNotSetError(name)
+    else:
+        print(f"{name.casefold().capitalize()}'s birthday is on {record.birthday}")
+
 @input_error
 def change_birthday(args, book: AddressBook) -> None:
     if len(args) < 2:
         raise IndexErr
+    
+
+@input_error
+def birthdays(book: AddressBook):
+    if not book:
+        raise EmptyDictError
+
+    from birthday import get_upcoming_birthdays
+    upcoming_birthdays = get_upcoming_birthdays(book)
+    heading_message = "Upcoming birthdays in your address book:"
+    birthdays_list = [f"\n - {list(item.keys())[0]}: {list(item.values())[0]}" for item in upcoming_birthdays]
+    final_list = [heading_message] + birthdays_list
+    print("".join(final_list))
