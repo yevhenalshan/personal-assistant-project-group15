@@ -37,7 +37,7 @@ class Phone(Field):
         return self.value
 
 class Birthday(Field):
-    def __init__(self, value):
+    def __init__(self, value) -> None:
         try:
             self.birthday = datetime.strptime(value, "%d.%m.%Y")
             super().__init__(value)
@@ -58,6 +58,7 @@ class Record:
 
     def change_birthday(self, birthday: str) -> None:
         self.birthday = Birthday(birthday)
+        print(f"Birthday date updated.")
 
     def add_phone(self, phone: str) -> None:
         if self.find_phone(phone):
@@ -82,7 +83,7 @@ class Record:
         else:
             raise ValueError("Phone number not found.")
 
-    def find_phone(self, phone: str):
+    def find_phone(self, phone: str) -> Phone | None:
         for p in self.phones:
             if p.value == phone:
                 return p

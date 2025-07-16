@@ -103,7 +103,14 @@ def show_birthday(args, book: AddressBook) -> None:
 @input_error
 def change_birthday(args, book: AddressBook) -> None:
     if len(args) < 2:
-        raise IndexErr
+        raise IndexError
+    
+    name, birthday, *_ = args
+    record = book.find(name)
+    if not record:
+        raise ValueError(f"Record with name '{name}' was not found.")
+    record.change_birthday(birthday)
+
     
 
 @input_error
