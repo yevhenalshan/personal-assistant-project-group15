@@ -1,0 +1,29 @@
+class ArgumentInstanceError(Exception):
+    pass
+
+class EmptyDictError(Exception):
+    pass
+
+class PhoneAlreadyExistsError(Exception):
+    def __init__(self, name: str) -> None:
+        self.name = name
+        super().__init__(name)
+
+    def __str__(self) -> str:
+        return f"Given phone number is already in {str(self.name).capitalize()}'s record."
+
+class BirthdayAlreadyExistsError(Exception):
+    def __init__(self, name: str) -> None:
+        self.name = name.casefold().capitalize()
+        super().__init__(name)
+
+    def __str__(self) -> str:
+        return f"{self.name}'s birthday is already set. Use 'change-birthday' to edit the date."
+
+class BirthdayNotSetError(Exception):
+    def __init__(self, name: str) -> None:
+        self.name = name.casefold().capitalize()
+        super().__init__(name)
+
+    def __str__(self) -> str:
+        return f"{str(self.name).capitalize()} does not have a birthday date set. Use 'add-birthday' to add the date."
