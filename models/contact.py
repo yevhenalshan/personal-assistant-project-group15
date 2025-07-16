@@ -52,6 +52,7 @@ class Record:
         self.name = Name(name)
         self.phones = []
         self.birthday = None
+        self.note = None
 
     def add_birthday(self, birthday: str) -> None:
         self.birthday = Birthday(birthday)
@@ -87,8 +88,35 @@ class Record:
             if p.value == phone:
                 return p
         return None
+    
+    def add_note(self, title: str, text: str) -> None:
+        note = Note(title, text)
+        self.note = note
 
+    def remove_note(self) -> None:
+        if self.note:
+            self.note = None
+        else:
+            raise ValueError("No note to remove.")
+
+    def edit_note(self, title: str, text: str) -> None:
+        if self.note:
+            self.note.title = title
+            self.note.text = text
+        else:
+            raise ValueError("No note to edit.")
+    
     def __str__(self) -> str:
         if self.phones:
             return f"Contact name: {str(self.name).capitalize()}, phones: {'; '.join(p.value for p in self.phones)}"
         return f"There are no phones in {str(self.name).capitalize()}'s record"
+
+class Note (Field):
+    def __init__(self, title: str, text: str) -> None:
+        if not title.strip():
+            raise ValueError("Note title cannot be empty.")
+        self.title = title.strip()
+        self.text = text.strip()
+
+    def __str__(self) -> str:
+        return f"Note : {self.title}: {self.text}"
