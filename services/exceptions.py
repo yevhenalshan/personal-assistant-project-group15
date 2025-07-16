@@ -27,3 +27,19 @@ class BirthdayNotSetError(Exception):
 
     def __str__(self) -> str:
         return f"{str(self.name)} does not have a birthday date set. Use 'add-birthday' to add the date."
+
+class EmailAlreadyExistsError(Exception):
+    def __init__(self, name: str) -> None:
+        self.name = name.capitalize()
+        super().__init__(name)
+
+    def __str__(self) -> str:
+        return f"Given email is already in {str(self.name)}'s record."
+    
+class EmailNotSetError(Exception):
+    def __init__(self, name: str) -> None:
+        self.name = name.casefold().capitalize()
+        super().__init__(name)
+
+    def __str__(self) -> str:
+        return f"{str(self.name)} does not have any email addresses set. Use 'add-email' to add the address."

@@ -1,4 +1,4 @@
-from services.exceptions import PhoneAlreadyExistsError
+from services.exceptions import PhoneAlreadyExistsError, EmailAlreadyExistsError
 from datetime import datetime
 from models.note import Note
 import re
@@ -14,7 +14,7 @@ class Name(Field):
     def __init__(self, name: str) -> None:
         if not name.isalpha():
             raise ValueError("Name must be alphabetic")
-        super().__init__(name.casefold())
+        super().__init__(name.casefold().capitalize())
 
     def __eq__(self, other) -> bool:
         return isinstance(other, Name) and self.value == other.value
@@ -39,14 +39,25 @@ class Phone(Field):
         return self.value
 
 class Birthday(Field):
-    def __init__(self, value) -> None:
+    def __init__(self, birthday) -> None:
         try:
-            self.birthday = datetime.strptime(value, "%d.%m.%Y")
-            super().__init__(value)
+            self.birthday = datetime.strptime(birthday, "%d.%m.%Y")
+            super().__init__(birthday)
         except ValueError:
             raise ValueError("Invalid date format. Use DD.MM.YYYY")
 
     def __str__(self):
+        return self.value
+    
+class Email(Field):
+    def __init__(self, email) -> None:
+        valid_email = re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email)
+        if valid_email:
+            super().__init__(email)
+        else:
+            raise ValueError("Email is in incorrect format.")
+    
+    def __str__(self) -> str:
         return self.value
 
 class Record:
@@ -54,6 +65,7 @@ class Record:
         self.name = Name(name)
         self.phones = []
         self.birthday = None
+        self.emails = []
         self.notes = []
 
     def add_birthday(self, birthday: str) -> None:
@@ -76,7 +88,7 @@ class Record:
         else:
             raise ValueError("Phone number not found.")
 
-    def edit_phone(self, old_phone: str, new_phone: str) -> None:
+    def change_phone(self, old_phone: str, new_phone: str) -> None:
         old_phone_obj = self.find_phone(old_phone)
         new_phone_exists = self.find_phone(new_phone)
 
@@ -93,6 +105,37 @@ class Record:
         for p in self.phones:
             if p.value == phone:
                 return p
+        return None
+    
+    def add_email(self, email: str) -> None:
+        if self.find_email(email):
+            raise EmailAlreadyExistsError(self.name.value)
+        self.emails.append(Email(email))
+
+    def change_email(self, old_email: str, new_email: str) -> None:
+        old_email_obj = self.find_phone(old_email)
+        new_email_obj = self.find_phone(new_email)
+
+        if not old_email_obj:
+            raise ValueError("Email not found.")
+        elif new_email_obj:
+            raise EmailAlreadyExistsError(self.name.value)
+        else:
+            self.emails.remove(old_email_obj)
+            new_email_obj = Email(new_email)
+            self.phones.append(new_email_obj)
+
+    def remove_email(self, email: str) -> None:
+        email_obj = self.find_email(email)
+        if email_obj is None:
+            raise ValueError("Email not found.")
+        else:
+            self.emails.remove(email_obj)
+
+    def find_email(self, email: str) -> Email | None:
+        for el in self.emails:
+            if el.value == email:
+                return el
         return None
 
     def __str__(self) -> str:
