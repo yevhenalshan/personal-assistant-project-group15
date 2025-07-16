@@ -1,7 +1,7 @@
 from storage import load_data, save_data
 from services.address_book import AddressBook
 from services.commands import (
-    add_contact, change_contact, show_phone, show_all,
+    add_contact, change_contact, show_phone, show_all, remove_phone,
     add_birthday, change_birthday, show_birthday, birthdays
 )
 from parser import parse_input
@@ -26,6 +26,8 @@ def run_cli():
                 change_contact(args, book)
             elif command == "phone":
                 show_phone(args, book)
+            elif command == "remove":
+                remove_phone(args, book)
             elif command == "all":
                 show_all(book)
             elif command == "add-birthday":
@@ -46,6 +48,7 @@ def run_cli():
     * add [username] [phone_number] - add a contact to the contact list. note: phone number must consist of 10 digits
     * change [username] [old_phone_number] [new_phone_number] - change an already existing contact
     * phone [username] - get to know a phone number by the contact's username
+    * remove [username] [phone_number] - remove phone number from a person's record
     * add-birthday [username] [birthday] - set a birthday date for a contact
     * change-birthday [username] [new_birthday] - change birthday date for a contact
     * show-birthday [username] - get to know the birthday date of the contact

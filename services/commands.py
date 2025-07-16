@@ -6,6 +6,7 @@ from services.exceptions import (
 )
 from models.contact import Record
 from services.address_book import AddressBook
+import re
 
 # Декоратор обробки помилок
 def input_error(func):
@@ -29,16 +30,18 @@ def add_contact(args: list[str], book: AddressBook) -> None:
     if len(args) < 2:
         raise IndexError
 
-    name, phone, *_ = args
+    name = args[0]
+    phone = "".join(args[1:]) 
+    clean_phone = re.sub(r"[^\d+]", "", phone)
     record = book.find(name)
 
     if not record:
         record_entry = Record(name)
-        record_entry.add_phone(phone)
+        record_entry.add_phone(clean_phone)
         book.add_record(record_entry)
         print("Contact added.")
     else:
-        record.add_phone(phone)
+        record.add_phone(clean_phone)
         print("Contact updated.")
 
 @input_error
@@ -46,12 +49,33 @@ def change_contact(args: list[str], book: AddressBook) -> None:
     if len(args) < 3:
         raise IndexError
 
-    name, old_phone, new_phone, *_ = args
+    name, old_phone,  = args[0], args[1]
+    new_phone = "".join(args[2:])
+    clean_new_phone = re.sub(r"[^\d+]", "", new_phone)
     record = book.find(name)
-    if record is None:
+
+    if not record:
         raise KeyError
-    record.edit_phone(old_phone, new_phone)
+    if old_phone == clean_new_phone:
+        raise ValueError("Phone numbers must be different.")
+    record.edit_phone(old_phone, clean_new_phone)
     print("Contact updated.")
+
+@input_error
+def remove_phone(args: list[str], book: AddressBook) -> None:
+    if len(args) < 2:
+        raise IndexError
+    
+    name = args[0]
+    phone = "".join(args[1:]) 
+    clean_phone = re.sub(r"[^\d+]", "", phone)
+    record = book.find(name)
+
+    if not record:
+        raise KeyError
+    else:
+        record.remove_phone(clean_phone)
+        print("Phone number removed from the record.")
 
 @input_error
 def show_phone(args: list[str], book: AddressBook) -> None:
