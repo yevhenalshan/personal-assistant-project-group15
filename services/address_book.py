@@ -10,7 +10,7 @@ class AddressBook(UserDict):
             raise ValueError("Name is already in address book")
         self.data[str(record.name)] = record
 
-    def find(self, name: str):
+    def find(self, name: str) -> Record | None:
         try:
             return self.data[name.casefold()]
         except KeyError:
