@@ -1,4 +1,5 @@
 from datetime import datetime
+from models.note import Note
 
 class Field:
     def __init__(self, value: str) -> None:
@@ -52,6 +53,7 @@ class Record:
         self.name = Name(name)
         self.phones = []
         self.birthday = None
+        self.notes = []
 
     def add_birthday(self, birthday: str) -> None:
         self.birthday = Birthday(birthday)
