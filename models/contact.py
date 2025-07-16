@@ -1,5 +1,7 @@
+from services.exceptions import PhoneAlreadyExistsError
 from datetime import datetime
 from models.note import Note
+import re
 
 class Field:
     def __init__(self, value: str) -> None:
@@ -22,12 +24,11 @@ class Name(Field):
 
 class Phone(Field):
     def __init__(self, phone) -> None:
-        if not phone.isdigit():
-            raise ValueError("Phone number must consist of digits.")
-        elif len(phone) != 10:
-            raise ValueError("Phone number must consist of 10 digits.")
-        else:
+        match_phone = re.fullmatch(r"\+?\d{10,15}", phone)
+        if match_phone:
             super().__init__(phone)
+        else:
+            raise ValueError("Phone number is either too short, too long or uses invalid format. Use 'help' for additional info") #TODO: в 'help' треба описати правильний формат, наприклад: +38(050)123-32-34, або просто 1234567890
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Phone) and self.value == other.value:
@@ -38,7 +39,7 @@ class Phone(Field):
         return self.value
 
 class Birthday(Field):
-    def __init__(self, value):
+    def __init__(self, value) -> None:
         try:
             self.birthday = datetime.strptime(value, "%d.%m.%Y")
             super().__init__(value)
@@ -60,11 +61,11 @@ class Record:
 
     def change_birthday(self, birthday: str) -> None:
         self.birthday = Birthday(birthday)
+        print(f"Birthday date updated.")
 
     def add_phone(self, phone: str) -> None:
         if self.find_phone(phone):
-            from services.exceptions import PhoneAlreadyExistsError
-            raise PhoneAlreadyExistsError(self.name)
+            raise PhoneAlreadyExistsError(self.name.value)
         phone_obj = Phone(phone)
         self.phones.append(phone_obj)
 
@@ -77,14 +78,18 @@ class Record:
 
     def edit_phone(self, old_phone: str, new_phone: str) -> None:
         old_phone_obj = self.find_phone(old_phone)
-        if old_phone_obj:
+        new_phone_exists = self.find_phone(new_phone)
+
+        if not old_phone_obj:
+            raise ValueError("Phone number not found.")
+        elif new_phone_exists:
+            raise PhoneAlreadyExistsError(self.name.value)
+        else:
             self.phones.remove(old_phone_obj)
             new_phone_obj = Phone(new_phone)
             self.phones.append(new_phone_obj)
-        else:
-            raise ValueError("Phone number not found.")
 
-    def find_phone(self, phone: str):
+    def find_phone(self, phone: str) -> Phone | None:
         for p in self.phones:
             if p.value == phone:
                 return p

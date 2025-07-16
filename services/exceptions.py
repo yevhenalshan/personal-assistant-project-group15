@@ -6,11 +6,11 @@ class EmptyDictError(Exception):
 
 class PhoneAlreadyExistsError(Exception):
     def __init__(self, name: str) -> None:
-        self.name = name
+        self.name = name.capitalize()
         super().__init__(name)
 
     def __str__(self) -> str:
-        return f"Given phone number is already in {str(self.name).capitalize()}'s record."
+        return f"Given phone number is already in {str(self.name)}'s record."
 
 class BirthdayAlreadyExistsError(Exception):
     def __init__(self, name: str) -> None:
@@ -26,4 +26,4 @@ class BirthdayNotSetError(Exception):
         super().__init__(name)
 
     def __str__(self) -> str:
-        return f"{str(self.name).capitalize()} does not have a birthday date set. Use 'add-birthday' to add the date."
+        return f"{str(self.name)} does not have a birthday date set. Use 'add-birthday' to add the date."
