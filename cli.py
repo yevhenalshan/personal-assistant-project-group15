@@ -1,7 +1,7 @@
 from storage import load_data, save_data
 from services.address_book import AddressBook
-from services.commands import (add_contact, add_note, change_contact, edit_note, find_note, remove_note, show_note, show_phone, show_all, remove_phone,
-     add_birthday, change_birthday, show_birthday, birthdays
+from services.commands import (add_contact, add_note, change_contact, edit_note, find_note, find_by_tags, remove_note, show_note, show_phone, show_all, remove_phone,
+     add_birthday, change_birthday, show_birthday, birthdays, search_contact
 )
 from parser import parse_input
 
@@ -46,7 +46,11 @@ def run_cli():
             elif command == "edit-note":
                 edit_note(args, book)
             elif command == "find-note":
-                find_note(args, book)            
+                find_note(args, book)
+            elif command == "find-by-tags":
+                find_by_tags(args, book)
+            elif command == "search":
+                search_contact(args, book)            
             elif command in ("close", "exit"):
                 save_data(book)
                 print("Goodbye!")
@@ -62,11 +66,13 @@ def run_cli():
     * change-birthday [username] [new_birthday] - change birthday date for a contact
     * show-birthday [username] - get to know the birthday date of the contact
     * birthdays - get to know birthdays from your address book for upcoming week
-    * add-note [username] [title] [text] - add a note to a contact
+    * add-note [username] [title] [text] [tags...] - add a note to a contact (tags can be individual words or ["tag1,tag2"] format)
     * show-notes [username] - show a contact's note
-    * edit-note [username] [title] [text] - edit a contact's note
+    * edit-note [username] [title] [text] [tags...] - edit a contact's note (tags are optional)
     * remove-note [username] - remove a contact's note
     * find-note [query] - search for notes containing the query text
+    * find-by-tags [tag1] [tag2] ... - search for notes with specific tags
+    * search [name] - search for contacts by name (partial match)
     * all - get all contacts from the contact list
     * exit - close the program
     * close - close the program"""

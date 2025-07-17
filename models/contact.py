@@ -1,6 +1,5 @@
 from services.exceptions import PhoneAlreadyExistsError
 from datetime import datetime
-from models.note import Note
 import re
 
 class Field:
@@ -94,8 +93,8 @@ class Record:
                 return p
         return None
     
-    def add_note(self, title: str, text: str) -> None:
-        note = Note(title, text)
+    def add_note(self, title: str, text: str, tags: list[str] = None) -> None:
+        note = Note(title, text, tags or [])
         self.note = note
 
     def remove_note(self) -> None:
@@ -104,10 +103,12 @@ class Record:
         else:
             raise ValueError("No note to remove.")
 
-    def edit_note(self, title: str, text: str) -> None:
+    def edit_note(self, title: str, text: str, tags: list[str] = None) -> None:
         if self.note:
             self.note.title = title
             self.note.text = text
+            if tags is not None:
+                self.note.tags = tags
         else:
             raise ValueError("No note to edit.")
     
@@ -116,12 +117,15 @@ class Record:
             return f"Contact name: {str(self.name).capitalize()}, phones: {'; '.join(p.value for p in self.phones)}"
         return f"There are no phones in {str(self.name).capitalize()}'s record"
 
-class Note (Field):
-    def __init__(self, title: str, text: str) -> None:
+class Note(Field):
+    def __init__(self, title: str, text: str, tags: list[str] = None) -> None:
         if not title.strip():
             raise ValueError("Note title cannot be empty.")
         self.title = title.strip()
         self.text = text.strip()
+        self.tags = tags or []
 
     def __str__(self) -> str:
-        return f"Note : {self.title}: {self.text}"
+        tags_str = f" [Tags: {', '.join(self.tags)}]" if self.tags else ""
+        return f"Note: {self.title}: {self.text}{tags_str}"
+
