@@ -12,7 +12,7 @@ class AddressBook(UserDict):
 
     def find(self, name: str) -> Record | None:
         try:
-            return self.data[name.casefold()]
+            return self.data[name.casefold().capitalize()]
         except KeyError:
             return None
 
@@ -31,7 +31,7 @@ class AddressBook(UserDict):
 
     def delete(self, name: str) -> None:
         try:
-            self.data.pop(name.casefold())
+            self.data.pop(name.casefold().capitalize())
         except KeyError:
             return None
         
