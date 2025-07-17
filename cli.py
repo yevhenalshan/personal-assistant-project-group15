@@ -1,8 +1,7 @@
 from storage import load_data, save_data
 from services.address_book import AddressBook
-from services.commands import (
-    add_contact, change_contact, show_phone, show_all, remove_phone,
-    add_birthday, change_birthday, show_birthday, birthdays
+from services.commands import (add_contact, add_note, change_contact, edit_note, find_note, remove_note, show_note, show_phone, show_all, remove_phone,
+     add_birthday, change_birthday, show_birthday, birthdays
 )
 from parser import parse_input
 
@@ -35,9 +34,19 @@ def run_cli():
             elif command == "change-birthday":
                 change_birthday(args, book)
             elif command == "show-birthday":
-                show_birthday(args, book)
+                show_birthday(args, book)   
             elif command == "birthdays":
                 birthdays(book)
+            elif command == "add-note":
+                add_note(args, book)    
+            elif command == "show-notes":
+                show_note(args, book)     
+            elif command == "remove-note":
+                remove_note(args, book)    
+            elif command == "edit-note":
+                edit_note(args, book)
+            elif command == "find-note":
+                find_note(args, book)            
             elif command in ("close", "exit"):
                 save_data(book)
                 print("Goodbye!")
@@ -53,6 +62,11 @@ def run_cli():
     * change-birthday [username] [new_birthday] - change birthday date for a contact
     * show-birthday [username] - get to know the birthday date of the contact
     * birthdays - get to know birthdays from your address book for upcoming week
+    * add-note [username] [title] [text] - add a note to a contact
+    * show-notes [username] - show a contact's note
+    * edit-note [username] [title] [text] - edit a contact's note
+    * remove-note [username] - remove a contact's note
+    * find-note [query] - search for notes containing the query text
     * all - get all contacts from the contact list
     * exit - close the program
     * close - close the program"""

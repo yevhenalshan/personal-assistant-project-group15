@@ -128,14 +128,11 @@ def show_birthday(args, book: AddressBook) -> None:
 def change_birthday(args, book: AddressBook) -> None:
     if len(args) < 2:
         raise IndexError
-    
     name, birthday, *_ = args
     record = book.find(name)
     if not record:
         raise ValueError(f"Record with name '{name}' was not found.")
-    record.change_birthday(birthday)
-
-    
+    record.change_birthday(birthday)    
 
 @input_error
 def birthdays(book: AddressBook):
@@ -148,3 +145,81 @@ def birthdays(book: AddressBook):
     birthdays_list = [f"\n - {list(item.keys())[0]}: {list(item.values())[0]}" for item in upcoming_birthdays]
     final_list = [heading_message] + birthdays_list
     print("".join(final_list))
+
+
+@input_error
+def add_note(args, book: AddressBook) -> None:
+    if len(args) < 3:
+        raise IndexError
+
+    name, title, text, *_ = args
+    record = book.find(name)
+    if not record:
+        raise ValueError(f"Record with name '{name}' was not found.")
+    elif record.note is None:
+        record.add_note(title, text)
+        print(f"Note added to {name.casefold().capitalize()}'s record.")
+    else:
+        print(f"Note already exists for {name.casefold().capitalize()}. Use 'edit-note' to modify it.")
+    
+@input_error    
+def show_note(args, book: AddressBook) -> None:
+    if len(args) < 1:
+        raise IndexError
+
+    name, *_ = args
+    record = book.find(name)
+    if record is None:
+        raise KeyError
+    elif record.note is None:
+        print(f"{name.casefold().capitalize()} has no note.")
+    else:
+        print(f"{name.casefold().capitalize()}'s note: {record.note}")
+
+@input_error
+def remove_note(args, book: AddressBook) -> None:
+    if len(args) < 1:
+        raise IndexError("Please provide name to remove.")
+
+    name,*_ = args
+    record = book.find(name)
+    if not record:
+        raise ValueError(f"Record with name '{name}' was not found.")
+
+    record.remove_note()
+    print(f"Note  removed from {name.capitalize()}'s record.")
+
+@input_error
+def edit_note(args, book: AddressBook) -> None:
+    if len(args) < 3:
+        raise IndexError
+
+    name, title, text, *_ = args
+    record = book.find(name)
+    if not record:
+        raise ValueError(f"Record with name '{name}' was not found.")
+    elif record.note is None:
+        print(f"{name.casefold().capitalize()} has no note to edit. Use 'add-note' to create one.")
+    else:
+        record.edit_note(title, text)
+        print(f"Note updated for {name.casefold().capitalize()}'s record.")    
+
+@input_error
+def find_note(args, book: AddressBook) -> None:
+    if len(args) < 1:
+        raise IndexError("Please provide text to search in notes.")
+
+    query, *_ = args
+    matches = book.find_by_note(query)
+
+    if not matches:
+        print(f"No notes containing '{query}' were found.")
+        return
+
+    print(f"Notes containing '{query}':")
+    for record in matches:
+        print(
+            f"- {str(record.name).capitalize()}: "
+            f"{record.note.title} — {record.note.text}"
+        )
+   
