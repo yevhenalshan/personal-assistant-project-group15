@@ -1,9 +1,11 @@
 from storage import load_data, save_data
 from services.address_book import AddressBook
+
 from services.commands import (
-    add_contact, change_contact, show_phone, show_all, remove_phone,
-    add_birthday, change_birthday, show_birthday, birthdays, add_email,
-    change_email, show_email, remove_email, emails
+    add_contact,  add_note, edit_note, find_note, remove_note, show_note,
+    change_contact, show_phone, show_all, remove_phone, add_birthday,
+    change_birthday, show_birthday, birthdays, add_email, change_email,
+    show_email, remove_email, emails
 )
 from parser import parse_input
 
@@ -50,6 +52,16 @@ def run_cli():
                     emails(book)
                 case "remove-email":
                     remove_email(args, book)
+                case "add-note":
+                    add_note(args, book)
+                case "show-notes":
+                    show_note(args, book)     
+                case "remove-note":
+                    remove_note(args, book)    
+                case "edit-note":
+                    edit_note(args, book)
+                case "find-note":
+                    find_note(args, book)
                 case "close" | "exit":
                     save_data(book)
                     print("Goodbye!")
@@ -70,6 +82,11 @@ def run_cli():
     * remove-email [username] [email] - remove an already existing email address from a contact record
     * show-email [username] - get to know an email address for a given contact
     * emails - get to know all the emails saved in your contact book
+    * add-note [username] [title] [text] - add a note to a contact
+    * show-notes [username] - show a contact's note
+    * edit-note [username] [title] [text] - edit a contact's note
+    * remove-note [username] - remove a contact's note
+    * find-note [query] - search for notes containing the query text
     * all - get all contacts from the contact list
     * exit - close the program
     * close - close the program"""
