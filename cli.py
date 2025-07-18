@@ -5,8 +5,9 @@ from services.commands import (
     add_contact,  add_note, edit_note, find_note, find_by_tags, remove_note, show_note,
     change_contact, show_phone, show_all, remove_phone, add_birthday,
     change_birthday, show_birthday, birthdays, add_email, change_email,
-    show_email, remove_email, emails )
-
+    show_email, remove_email, emails, add_address, change_address,
+    show_address, delete_record
+)
 from parser import parse_input
 
 def run_cli():
@@ -40,17 +41,25 @@ def run_cli():
                 case "show-birthday":
                     show_birthday(args, book)
                 case "birthdays":
-                    birthdays(book)
+                    birthdays(args, book)
                 case "add-email":
                     add_email(args, book)
                 case "change-email":
                     change_email(args, book)
                 case "show-email":
                     show_email(args, book)
-                case "emails":
-                    emails(book)
                 case "remove-email":
                     remove_email(args, book)
+                case "emails":
+                    emails(book)
+                case "add-address":
+                    add_address(args, book)
+                case "change-address":
+                    change_address(args, book)
+                case "show-address":
+                    show_address(args, book)
+                case "delete":
+                    delete_record(args, book)
                 case "add-note":
                     add_note(args, book)
                 case "show-notes":
@@ -88,8 +97,12 @@ def run_cli():
     * edit-note [username] [title] [text] [tags...] - edit a contact's note (tags are optional)
     * remove-note [username] - remove a contact's note
     * find-note [query] - search for notes containing the query text
+    * add-address [name] [address] - add a residential address to a contact record 
+    * change-address [name] [new_address] - change the residential address for a contact record 
+    * show-address [name] - get to know the residential address of a contact
     * find-by-tags [tag1] [tag2] ... - search for notes with specific tags
     * search [name] - search for contacts by name (partial match)
+    * delete [name] - delete a record
     * all - get all contacts from the contact list
     * exit - close the program
     * close - close the program"""

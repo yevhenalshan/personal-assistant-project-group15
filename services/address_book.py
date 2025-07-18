@@ -96,7 +96,8 @@ class AddressBook(UserDict):
         return results     
 
     def __str__(self) -> str:
-        result = ""
-        for name, record in self.data.items():
-            result += str(record) + "\n"
-        return result.strip()
+        result = "Your contact list:\n" + "\n".join([f"{record}" for record in self.data.values()]) 
+        # result = ""
+        # for name, record in self.data.items():
+        #     result += str(record) + "\n"
+        return result

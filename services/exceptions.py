@@ -43,3 +43,11 @@ class EmailNotSetError(Exception):
 
     def __str__(self) -> str:
         return f"{str(self.name)} does not have any email addresses set. Use 'add-email' to add the address."
+    
+class AddressNotSetError(Exception):
+    def __init__(self, name: str) -> None:
+        self.name = name.casefold().capitalize()
+        super().__init__(name)
+
+    def __str__(self) -> str:
+        return f"{str(self.name)} does not have a residential address set. Use 'add-address' to add the address."
