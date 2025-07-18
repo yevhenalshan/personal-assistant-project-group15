@@ -171,9 +171,34 @@ class Record:
             raise ValueError("No note to edit.")
     
     def __str__(self) -> str:
+        info = [f"Contact name: {str(self.name).capitalize()}"]
+
         if self.phones:
-            return f"Contact name: {str(self.name).capitalize()}, phones: {'; '.join(p.value for p in self.phones)}"
-        return f"There are no phones in {str(self.name).capitalize()}'s record"
+            info.append(f"Phones: {', '.join(p.value for p in self.phones)}")
+        else:
+            info.append("Phones: —")
+
+        if self.birthday:
+            info.append(f"Birthday: {self.birthday}")
+        else:
+            info.append("Birthday: —")
+
+        if self.emails:
+            info.append(f"Emails: {', '.join(e.value for e in self.emails)}")
+        else:
+            info.append("Emails: —")
+
+        if self.address:
+            info.append(f"Address: {self.address}")
+        else:
+            info.append("Address: —")
+
+        if self.note:
+            info.append(f"Note: {self.note}")
+        else:
+            info.append("Note: —")
+
+        return "\n".join(info)
 
 class Note(Field):
     def __init__(self, title: str, text: str, tags: list[str] | None = None) -> None:
