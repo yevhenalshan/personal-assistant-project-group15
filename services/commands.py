@@ -143,7 +143,7 @@ def show_birthday(args: list[str], book: AddressBook) -> None:
         print(f"{name.casefold().capitalize()}'s birthday is on {record.birthday}")
 
 @input_error
-def birthdays(book: AddressBook):
+def birthdays(args: list[str], book: AddressBook) -> None:
     if not book:
         raise EmptyDictError
 
