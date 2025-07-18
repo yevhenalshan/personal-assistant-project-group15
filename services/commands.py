@@ -227,16 +227,28 @@ def add_note(args, book: AddressBook) -> None:
 
     name = args[0]
     title = args[1]
-    text = args[2]
-    tags = args[3:]  # всё, что идёт после текста — это теги
     
-    # Parse tags if they're provided in bracket notation like ["tag1,tag2"]
-    if tags and len(tags) == 1 and tags[0].startswith('[') and tags[0].endswith(']'):
-        # Handle bracket notation like ["tag1,tag2"]
-        tag_str = tags[0][1:-1]  # Remove brackets
+    # Everything after title is text, until tags are found
+    text_parts = []
+    tags = []
+    for arg in args[2:]:
+        # Check if this looks like a tag (in brackets or single quoted string with commas)
+        if (arg.startswith('[') and arg.endswith(']')) or \
+           (arg.startswith('"') and arg.endswith('"') and ',' in arg and arg.count('"') == 2):
+            tags.append(arg)
+            break
+        else:
+            text_parts.append(arg)
+    text = " ".join(text_parts)
+
+    # Parse tags if they're provided in bracket notation like ["tag1,tag2"] or quoted string
+    if tags:
+        tag_str = tags[0]
+        if tag_str.startswith('[') and tag_str.endswith(']'):
+            tag_str = tag_str[1:-1]  # Remove brackets
         if tag_str.startswith('"') and tag_str.endswith('"'):
             tag_str = tag_str[1:-1]  # Remove quotes
-        tags = [tag.strip() for tag in tag_str.split(',')]
+        tags = [tag.strip().replace('"', '') for tag in tag_str.split(',')]
 
     record = book.find(name)
     if not record:
@@ -281,16 +293,28 @@ def edit_note(args, book: AddressBook) -> None:
 
     name = args[0]
     title = args[1]
-    text = args[2]
-    tags = args[3:] if len(args) > 3 else None  # Tags are optional
     
-    # Parse tags if they're provided in bracket notation like ["tag1,tag2"]
-    if tags and len(tags) == 1 and tags[0].startswith('[') and tags[0].endswith(']'):
-        # Handle bracket notation like ["tag1,tag2"]
-        tag_str = tags[0][1:-1]  # Remove brackets
+    # Everything after title is text, until tags are found
+    text_parts = []
+    tags = []
+    for arg in args[2:]:
+        # Check if this looks like a tag (in brackets or single quoted string with commas)
+        if (arg.startswith('[') and arg.endswith(']')) or \
+           (arg.startswith('"') and arg.endswith('"') and ',' in arg and arg.count('"') == 2):
+            tags.append(arg)
+            break
+        else:
+            text_parts.append(arg)
+    text = " ".join(text_parts)
+
+    # Parse tags if they're provided in bracket notation like ["tag1,tag2"] or quoted string
+    if tags:
+        tag_str = tags[0]
+        if tag_str.startswith('[') and tag_str.endswith(']'):
+            tag_str = tag_str[1:-1]  # Remove brackets
         if tag_str.startswith('"') and tag_str.endswith('"'):
             tag_str = tag_str[1:-1]  # Remove quotes
-        tags = [tag.strip() for tag in tag_str.split(',')]
+        tags = [tag.strip().replace('"', '') for tag in tag_str.split(',')]
 
     record = book.find(name)
     if not record:
@@ -299,7 +323,7 @@ def edit_note(args, book: AddressBook) -> None:
         print(f"{name.casefold().capitalize()} has no note to edit. Use 'add-note' to create one.")
     else:
         record.edit_note(title, text, tags)
-        print(f"Note updated for {name.casefold().capitalize()}'s record.")    
+        print(f"Note updated for {name.casefold().capitalize()}'s record.")
 
 @input_error
 def find_note(args, book: AddressBook) -> None:
