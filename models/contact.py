@@ -73,7 +73,6 @@ class Record:
         self.birthday = None
         self.emails = []
         self.address = None
-        self.notes = []
         self.note = None
       
     def add_birthday(self, birthday: str) -> None:
@@ -115,8 +114,9 @@ class Record:
         return None
     
 
-    def add_note(self, title: str, text: str, tags: list[str] = None) -> None:
+    def add_note(self, title: str, text: str, tags: list[str] | None = None) -> None:
         note = Note(title, text, tags or [])
+        self.note = note
 
     def add_email(self, email: str) -> None:
         if self.find_email(email):
@@ -154,12 +154,6 @@ class Record:
 
     def change_address(self, address: str) -> None:
         self.address = Address(address)
-    
-    # def set_address(self, address: str) -> None:
-    #     self.address = Address(address)
-
-
-        self.note = note
 
     def remove_note(self) -> None:
         if self.note:
@@ -167,7 +161,7 @@ class Record:
         else:
             raise ValueError("No note to remove.")
 
-    def edit_note(self, title: str, text: str, tags: list[str] = None) -> None:
+    def edit_note(self, title: str, text: str, tags: list[str] | None = None) -> None:
         if self.note:
             self.note.title = title
             self.note.text = text
@@ -182,7 +176,7 @@ class Record:
         return f"There are no phones in {str(self.name).capitalize()}'s record"
 
 class Note(Field):
-    def __init__(self, title: str, text: str, tags: list[str] = None) -> None:
+    def __init__(self, title: str, text: str, tags: list[str] | None = None) -> None:
         if not title.strip():
             raise ValueError("Note title cannot be empty.")
         self.title = title.strip()
