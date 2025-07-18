@@ -171,9 +171,19 @@ class Record:
             raise ValueError("No note to edit.")
     
     def __str__(self) -> str:
+        result = f"Contact name: {str(self.name).capitalize()}"
+        
         if self.phones:
-            return f"Contact name: {str(self.name).capitalize()}, phones: {'; '.join(p.value for p in self.phones)}"
-        return f"There are no phones in {str(self.name).capitalize()}'s record"
+            result += f", phones: {'; '.join(p.value for p in self.phones)}"
+        else:
+            result += f" (no phones)"
+            
+        if self.note:
+            result += f" | Note: {self.note.title}: {self.note.text}"
+            if self.note.tags:
+                result += f" [Tags: {', '.join(self.note.tags)}]"
+                
+        return result
 
 class Note(Field):
     def __init__(self, title: str, text: str, tags: list[str] | None = None) -> None:

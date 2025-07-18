@@ -62,7 +62,7 @@ def run_cli():
                     delete_record(args, book)
                 case "add-note":
                     add_note(args, book)
-                case "show-notes":
+                case "show-note":
                     show_note(args, book)     
                 case "remove-note":
                     remove_note(args, book)    
@@ -93,7 +93,7 @@ def run_cli():
     * show-email [username] - get to know an email address for a given contact
     * emails - get to know all the emails saved in your contact book   
     * add-note [username] [title] [text] [tags...] - add a note to a contact (tags can be individual words or ["tag1,tag2"] format)
-    * show-notes [username] - show a contact's note
+    * show-note [username] - show a contact's note
     * edit-note [username] [title] [text] [tags...] - edit a contact's note (tags are optional)
     * remove-note [username] - remove a contact's note
     * find-note [query] - search for notes containing the query text
