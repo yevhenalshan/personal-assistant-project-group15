@@ -4,10 +4,12 @@ from services.exceptions import (
     BirthdayAlreadyExistsError,
     BirthdayNotSetError,
     EmailAlreadyExistsError,
-    EmailNotSetError
+    EmailNotSetError,
+    AddressNotSetError
 )
 from models.contact import Record
 from services.address_book import AddressBook
+from birthday import get_upcoming_birthdays
 import re
 
 # Декоратор обробки помилок
@@ -23,7 +25,7 @@ def input_error(func):
             print("Too few arguments were given. Use 'help' for additional info.")
         except EmptyDictError:
             print("Address book is empty. Add a contact with 'add' command.")
-        except (PhoneAlreadyExistsError, BirthdayAlreadyExistsError, BirthdayNotSetError, EmailAlreadyExistsError, EmailNotSetError) as e:
+        except (PhoneAlreadyExistsError, BirthdayAlreadyExistsError, BirthdayNotSetError, EmailAlreadyExistsError, EmailNotSetError, AddressNotSetError) as e:
             print(e)
     return inner
 
@@ -124,6 +126,7 @@ def change_birthday(args: list[str], book: AddressBook) -> None:
         raise ValueError("New birthday date must differ from the old one.")
     else:
         record.change_birthday(birthday)
+        print("Birthday date updated.")
 
 @input_error    
 def show_birthday(args: list[str], book: AddressBook) -> None:
@@ -140,22 +143,11 @@ def show_birthday(args: list[str], book: AddressBook) -> None:
         print(f"{name.casefold().capitalize()}'s birthday is on {record.birthday}")
 
 @input_error
-def change_birthday(args, book: AddressBook) -> None:
-    if len(args) < 2:
-        raise IndexError
-    name, birthday, *_ = args
-    record = book.find(name)
-    if not record:
-        raise ValueError(f"Record with name '{name}' was not found.")
-    record.change_birthday(birthday)    
-
-@input_error
 def birthdays(book: AddressBook):
     if not book:
         raise EmptyDictError
 
-    from birthday import get_upcoming_birthdays
-    upcoming_birthdays = get_upcoming_birthdays(book)
+    upcoming_birthdays = get_upcoming_birthdays(book) if len(args) < 1 else get_upcoming_birthdays(book, days=int(args[0]))
     heading_message = "Upcoming birthdays in your address book:"
     birthdays_list = [f"\n - {list(item.keys())[0]}: {list(item.values())[0]}" for item in upcoming_birthdays]
     if not birthdays_list:
@@ -302,3 +294,60 @@ def find_note(args, book: AddressBook) -> None:
             f"- {str(record.name).capitalize()}: "
             f"{record.note.title} — {record.note.text}"
         )
+
+
+@input_error
+def add_address(args: list[str], book: AddressBook) -> None:
+    if len(args) < 2:
+        raise IndexError
+    
+    name = args[0]
+    address = " ".join(args[1:])
+    record = book.find(name)
+
+    if record is None:
+        raise KeyError
+    elif record.address:
+        raise ValueError(f"Residential address is already set for {name.casefold().capitalize()}. Use 'change-address' to change it.")
+    else:
+        record.add_address(address)
+        print(f"Residential address added to {name.casefold().capitalize()}'s record.")
+
+@input_error
+def change_address(args: list[str], book: AddressBook) -> None:
+    if len(args) < 2:
+        raise IndexError
+    
+    name = args[0]
+    address = " ".join(args[1:])
+    record = book.find(name)
+
+    if record is None:
+        raise KeyError
+    else:
+        record.change_address(address)
+        print("Residential address updated.")
+
+@input_error
+def show_address(args: list[str], book: AddressBook) -> None:
+    if len(args) < 1:
+        raise IndexError
+    
+    name, *_ = args
+    record = book.find(name)
+
+    if record is None:
+        raise KeyError
+    elif record.address is None:
+        raise AddressNotSetError(name)
+    else:
+        # print(str(record.address))
+        print(f"{name.casefold().capitalize()}'s residential address is {record.address}")
+
+@input_error
+def delete_record(args: list[str], book: AddressBook) -> None:
+    if len(args) < 1:
+        raise IndexError
+    
+    name, *_ = args
+    book.delete(name)

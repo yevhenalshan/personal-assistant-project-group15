@@ -23,7 +23,7 @@ class Name(Field):
         return self.value
 
 class Phone(Field):
-    def __init__(self, phone) -> None:
+    def __init__(self, phone: str) -> None:
         match_phone = re.fullmatch(r"\+?\d{10,15}", phone)
         if match_phone:
             super().__init__(phone)
@@ -39,7 +39,7 @@ class Phone(Field):
         return self.value
 
 class Birthday(Field):
-    def __init__(self, birthday) -> None:
+    def __init__(self, birthday: str) -> None:
         try:
             self.birthday = datetime.strptime(birthday, "%d.%m.%Y")
             super().__init__(birthday)
@@ -50,12 +50,19 @@ class Birthday(Field):
         return self.value
     
 class Email(Field):
-    def __init__(self, email) -> None:
+    def __init__(self, email: str) -> None:
         valid_email = re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email)
         if valid_email:
             super().__init__(email)
         else:
             raise ValueError("Email is in incorrect format.")
+    
+    def __str__(self) -> str:
+        return self.value
+    
+class Address(Field):
+    def __init__(self, address: str) -> None:
+        super().__init__(address.title())
     
     def __str__(self) -> str:
         return self.value
@@ -66,6 +73,7 @@ class Record:
         self.phones = []
         self.birthday = None
         self.emails = []
+        self.address = None
         self.notes = []
         self.note = None
       
@@ -74,7 +82,6 @@ class Record:
 
     def change_birthday(self, birthday: str) -> None:
         self.birthday = Birthday(birthday)
-        print(f"Birthday date updated.")
 
     def add_phone(self, phone: str) -> None:
         if self.find_phone(phone):
@@ -138,6 +145,16 @@ class Record:
             if el.value == email:
                 return el
         return None
+    
+    def add_address(self, address: str) -> None:
+        self.address = Address(address)
+
+    def change_address(self, address: str) -> None:
+        self.address = Address(address)
+    
+    # def set_address(self, address: str) -> None:
+    #     self.address = Address(address)
+
 
     def add_note(self, title: str, text: str) -> None:
         note = Note(title, text)
