@@ -1,14 +1,61 @@
 from storage import load_data, save_data
 from services.address_book import AddressBook
-
 from services.commands import (
-    add_contact,  add_note, edit_note, find_note, find_by_tags, remove_note, show_note,
+    add_contact, add_note, edit_note, find_note, find_by_tags, remove_note, show_note,
     change_contact, show_phone, show_all, remove_phone, add_birthday,
     change_birthday, show_birthday, birthdays, add_email, change_email,
     show_email, remove_email, emails, add_address, change_address,
     show_address, delete_record
 )
 from parser import parse_input
+
+# Глобальні змінні для пагінації
+current_page = 0
+contacts_per_page = 5
+
+def get_contacts_for_page(book, page, per_page):
+    # Підтримка як UserDict, так і dict
+    contacts = list(book.data.values()) if hasattr(book, "data") else list(book.values())
+    total_pages = (len(contacts) + per_page - 1) // per_page
+    start = page * per_page
+    end = start + per_page
+    return contacts[start:end], total_pages
+
+def show_all_with_pagination(book):
+    global current_page, contacts_per_page
+    contacts, total_pages = get_contacts_for_page(book, current_page, contacts_per_page)
+    if not contacts:
+        print("Your address book is empty.")
+        return
+    print(f"\nYour contact list (page {current_page + 1} of {total_pages}):")
+    for record in contacts:
+        print("-" * 30)
+        print(record)
+    print("-" * 30)
+    if total_pages > 1:
+        if current_page == 0:
+            print("You're on the first page. Type 'next' to go forward.")
+        elif current_page == total_pages - 1:
+            print("You're on the last page. Type 'prev' to go back.")
+        else:
+            print("Type 'next' or 'prev' to switch pages.")
+
+def next_page(book):
+    global current_page, contacts_per_page
+    _, total_pages = get_contacts_for_page(book, current_page, contacts_per_page)
+    if current_page < total_pages - 1:
+        current_page += 1
+        show_all_with_pagination(book)
+    else:
+        print("You're already on the last page.")
+
+def prev_page(book):
+    global current_page
+    if current_page > 0:
+        current_page -= 1
+        show_all_with_pagination(book)
+    else:
+        print("You're already on the first page.")
 
 def run_cli():
     book = load_data()
@@ -33,7 +80,12 @@ def run_cli():
                 case "remove":
                     remove_phone(args, book)
                 case "all":
-                    show_all(book)
+                    # Показуємо сторінку з пагінацією
+                    show_all_with_pagination(book)
+                case "next":
+                    next_page(book)
+                case "prev":
+                    prev_page(book)
                 case "add-birthday":
                     add_birthday(args, book)
                 case "change-birthday":
@@ -103,7 +155,9 @@ def run_cli():
     * find-by-tags [tag1] [tag2] ... - search for notes with specific tags
     * search [name] - search for contacts by name (partial match)
     * delete [name] - delete a record
-    * all - get all contacts from the contact list
+    * all - get all contacts from the contact list (5 per page; use 'next'/'prev' for pagination)
+    * next - go to next page of contacts
+    * prev - go to previous page of contacts
     * exit - close the program
     * close - close the program"""
                     )
