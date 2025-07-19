@@ -90,7 +90,7 @@ def show_phone(args: list[str], book: AddressBook) -> None:
     record = book.find(name)
     if record is None:
         raise KeyError
-    print(record)
+    print(f"Phone records for {name.casefold().capitalize()}: {', '.join([str(phone) for phone in record.phones])}")
 
 @input_error
 def show_all(book: AddressBook) -> None:

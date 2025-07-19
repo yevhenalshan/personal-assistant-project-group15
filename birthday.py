@@ -1,6 +1,8 @@
 from datetime import datetime, date, timedelta
 
 def get_upcoming_birthdays(book, days=7):
+    if days < 1:
+        raise ValueError("Number of days must be positive")
     congratulate_users = []
     today = date.today()
     for name, record in book.items():
