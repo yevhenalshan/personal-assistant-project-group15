@@ -32,6 +32,7 @@ class AddressBook(UserDict):
     def delete(self, name: str) -> None:
         try:
             self.data.pop(name.casefold().capitalize())
+            print(f"{name.casefold().capitalize()}'s record deleted.")
         except KeyError:
             return None
         

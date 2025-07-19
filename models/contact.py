@@ -124,8 +124,8 @@ class Record:
         self.emails.append(Email(email))
 
     def change_email(self, old_email: str, new_email: str) -> None:
-        old_email_obj = self.find_phone(old_email)
-        new_email_obj = self.find_phone(new_email)
+        old_email_obj = self.find_email(old_email)
+        new_email_obj = self.find_email(new_email)
 
         if not old_email_obj:
             raise ValueError("Email not found.")
@@ -134,7 +134,7 @@ class Record:
         else:
             self.emails.remove(old_email_obj)
             new_email_obj = Email(new_email)
-            self.phones.append(new_email_obj)
+            self.emails.append(new_email_obj)
 
     def remove_email(self, email: str) -> None:
         email_obj = self.find_email(email)
@@ -210,5 +210,5 @@ class Note(Field):
 
     def __str__(self) -> str:
         tags_str = f" [Tags: {', '.join(self.tags)}]" if self.tags else ""
-        return f"Note: {self.title}: {self.text}{tags_str}"
+        return f"{self.title}: {self.text}{tags_str}"
 

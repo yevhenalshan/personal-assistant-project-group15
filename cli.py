@@ -5,7 +5,7 @@ from services.commands import (
     change_contact, show_phone, show_all, remove_phone, add_birthday,
     change_birthday, show_birthday, birthdays, add_email, change_email,
     show_email, remove_email, emails, add_address, change_address,
-    show_address, delete_record
+    show_address, search_contact, delete_record
 )
 from parser import parse_input
 
@@ -110,8 +110,6 @@ def run_cli():
                     change_address(args, book)
                 case "show-address":
                     show_address(args, book)
-                case "delete":
-                    delete_record(args, book)
                 case "add-note":
                     add_note(args, book)
                 case "show-note":
@@ -124,6 +122,10 @@ def run_cli():
                     find_note(args, book)
                 case "find-by-tags":
                     find_by_tags(args, book)
+                case "search":
+                    search_contact(args, book)
+                case "delete":
+                    delete_record(args, book)
                 case "close" | "exit":
                     save_data(book)
                     print("Goodbye!")
@@ -146,7 +148,7 @@ def run_cli():
     * emails - get to know all the emails saved in your contact book   
     * add-note [username] [title] [text] [tags...] - add a note to a contact (tags can be individual words or ["tag1,tag2"] format)
     * show-note [username] - show a contact's note
-    * edit-note [username] [title] [text] [tags...] - edit a contact's note (tags are optional)
+    * edit-note [username] [title] ["text"] [tags...] - edit a contact's note (tags are optional)
     * remove-note [username] - remove a contact's note
     * find-note [query] - search for notes containing the query text
     * add-address [name] [address] - add a residential address to a contact record 
