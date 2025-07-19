@@ -48,14 +48,10 @@ class AddressBook(UserDict):
                     if title_match or text_match:
                         results.append(record)
             except AttributeError:
-                # Skip records that don't have proper note structure
                 continue
         return results
 
     def find_by_tags(self, tags: list[str]):
-        """
-        Returns a list of Records where the note contains any of the specified tags (case-insensitive).
-        """
         results = []
         for record in self.data.values():
             try:
@@ -75,29 +71,23 @@ class AddressBook(UserDict):
                     else:
                         # If tags are stored as a comma-separated string, split them
                         note_tags_str = str(note_tags)
-                        # Handle the case where the entire string is quoted like "tag1,tag2"
                         if note_tags_str.startswith('"') and note_tags_str.endswith('"'):
-                            note_tags_str = note_tags_str[1:-1]  # Remove outer quotes
-                        # Also handle the case where it's in list format like ["tag1,tag2"]
+                            note_tags_str = note_tags_str[1:-1]  
+ 
                         if note_tags_str.startswith('[') and note_tags_str.endswith(']'):
-                            note_tags_str = note_tags_str[1:-1]  # Remove brackets
+                            note_tags_str = note_tags_str[1:-1]  
                         note_tags_lower = [tag.strip().casefold() for tag in note_tags_str.split(',')]
                     
                     search_tags_lower = [tag.casefold() for tag in tags]
                     
-                    # Find matching tags
                     matching_tags = [tag for tag in search_tags_lower if tag in note_tags_lower]
                     
                     if matching_tags:
                         results.append((record, matching_tags))
             except AttributeError:
-                # Skip records that don't have proper note structure
                 continue
         return results     
 
     def __str__(self) -> str:
         result = "Your contact list:\n" + "\n".join([f"{record}" for record in self.data.values()]) 
-        # result = ""
-        # for name, record in self.data.items():
-        #     result += str(record) + "\n"
         return result
