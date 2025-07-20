@@ -118,7 +118,7 @@ def show_all_with_pagination(book: AddressBook):
     print("-" * 30)
     if total_pages > 1:
         if current_page == 0:
-            print(f"You're on the first page. Type {Fore.GREEN}'next'{Fore.RESET}' to go forward.")
+            print(f"You're on the first page. Type {Fore.GREEN}'next'{Fore.RESET} to go forward.")
         elif current_page == total_pages - 1:
             print(f"You're on the last page. Type {Fore.GREEN}'prev'{Fore.RESET} to go back.")
         else:
