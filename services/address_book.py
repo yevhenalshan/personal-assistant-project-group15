@@ -2,6 +2,7 @@ from collections import UserDict
 from services.exceptions import ArgumentInstanceError
 from models.contact import Record
 
+
 class AddressBook(UserDict):
     def add_record(self, record: Record) -> None:
         if not isinstance(record, Record):

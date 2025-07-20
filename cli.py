@@ -1,167 +1,106 @@
 from storage import load_data, save_data
-from services.address_book import AddressBook
 from services.commands import (
     add_contact, add_note, edit_note, find_note, find_by_tags, remove_note, show_note,
-    change_contact, show_phone, show_all, remove_phone, add_birthday,
+    change_contact, show_phone, remove_phone, add_birthday,
     change_birthday, show_birthday, birthdays, add_email, change_email,
     show_email, remove_email, emails, add_address, change_address,
-    show_address, delete_record
+    show_address, search_contact, delete_record, show_all_with_pagination, 
+    next_page, prev_page
 )
 from parser import parse_input
+from colorama import Fore
 
-# Глобальні змінні для пагінації
-current_page = 0
-contacts_per_page = 5
+HELP_MESSAGE = f"""The following commands are available:
+    * {Fore.GREEN + 'add <username> <phone_number>':<60}{Fore.RESET} - add a contact to the contact list. note: phone number must consist of 10 digits
+    * {Fore.GREEN + 'change <username> <old_phone_number> <new_phone_number>':<60}{Fore.RESET} - change an already existing contact
+    * {Fore.GREEN + 'phone <username>':<60}{Fore.RESET} - get to know a phone number by the contact's username
+    * {Fore.GREEN + 'remove <username> <phone_number>':<60}{Fore.RESET} - remove phone number from a person's record
+    * {Fore.GREEN + 'add-birthday <username> <birthday>':<60}{Fore.RESET} - set a birthday date for a contact
+    * {Fore.GREEN + 'change-birthday <username> <new_birthday>':<60}{Fore.RESET} - change birthday date for a contact
+    * {Fore.GREEN + 'show-birthday <username>':<60}{Fore.RESET} - get to know the birthday date of the contact
+    * {Fore.GREEN + 'birthdays *days*':<60}{Fore.RESET} - get to know birthdays from your address book for a given number of days (week by default)
+    * {Fore.GREEN + 'add-email <username> <email>':<60}{Fore.RESET} - add an email address to a contact record
+    * {Fore.GREEN + 'change-email <username> <old_email> <new_email>':<60}{Fore.RESET} - change given email address of a contact
+    * {Fore.GREEN + 'remove-email <username> <email>':<60}{Fore.RESET} - remove an already existing email address from a contact record
+    * {Fore.GREEN + 'show-email <username>':<60}{Fore.RESET} - get to know an email address for a given contact
+    * {Fore.GREEN + 'emails':<60}{Fore.RESET} - get to know all the emails saved in your contact book   
+    * {Fore.GREEN + 'add-note <username> <title> <text> [tags...]':<60}{Fore.RESET} - add a note to a contact (tags can be individual words or ["tag1", "tag2"] format)
+    * {Fore.GREEN + 'show-note <username>':<60}{Fore.RESET} - show a contact's note
+    * {Fore.GREEN + 'edit-note <username> <title> <text> [tags...]':<60}{Fore.RESET} - edit a contact's note (tags are optional)
+    * {Fore.GREEN + 'remove-note <username>':<60}{Fore.RESET} - remove a contact's note
+    * {Fore.GREEN + 'find-note <query>':<60}{Fore.RESET} - search for notes containing the query text
+    * {Fore.GREEN + 'add-address <name> <address>':<60}{Fore.RESET} - add a residential address to a contact record 
+    * {Fore.GREEN + 'change-address <name> <new_address>':<60}{Fore.RESET} - change the residential address for a contact record 
+    * {Fore.GREEN + 'show-address <name>':<60}{Fore.RESET} - get to know the residential address of a contact
+    * {Fore.GREEN + 'find-by-tags <tag1> <tag2> ...':<60}{Fore.RESET} - search for notes with specific tags
+    * {Fore.GREEN + 'search <name>':<60}{Fore.RESET} - search for contacts by name (partial match)
+    * {Fore.GREEN + 'delete <name>':<60}{Fore.RESET} - delete a record
+    * {Fore.GREEN + 'all':<60}{Fore.RESET} - get all contacts from the contact list (5 per page; use 'next'/'prev' for pagination)
+    * {Fore.GREEN + 'exit':<60}{Fore.RESET} - close the program
+    * {Fore.GREEN + 'close':<60}{Fore.RESET} - close the program"""
 
-def get_contacts_for_page(book, page, per_page):
-    # Підтримка як UserDict, так і dict
-    contacts = list(book.data.values()) if hasattr(book, "data") else list(book.values())
-    total_pages = (len(contacts) + per_page - 1) // per_page
-    start = page * per_page
-    end = start + per_page
-    return contacts[start:end], total_pages
+COMMANDS = {
+    "hello": lambda args, book: print(f"{Fore.YELLOW}How can I help you?{Fore.RESET}"),
+    "add": add_contact,
+    "change": change_contact,
+    "phone": show_phone,
+    "remove": remove_phone,
+    "add-birthday": add_birthday,
+    "change-birthday": change_birthday,
+    "show-birthday": show_birthday,
+    "birthdays": birthdays,
+    "add-email": add_email,
+    "change-email": change_email,
+    "show-email": show_email,
+    "remove-email": remove_email,
+    "emails": lambda args, book: emails(book),
+    "add-note": add_note,
+    "show-note": show_note,
+    "edit-note": edit_note,
+    "remove-note": remove_note,
+    "find-note": remove_note,
+    "find-note": find_note,
+    "find-by-tags": find_by_tags,
+    "add-address": add_address,
+    "change-address": change_address,
+    "show-address": show_address,
+    "delete": delete_record,
+    "search": search_contact,
+    "all": lambda args, book: show_all_with_pagination(book),
+    "next": lambda args, book: next_page(book),
+    "prev": lambda args, book: prev_page(book),
+    "help": lambda args, book: print(HELP_MESSAGE)
+}
 
-def show_all_with_pagination(book):
-    global current_page, contacts_per_page
-    contacts, total_pages = get_contacts_for_page(book, current_page, contacts_per_page)
-    if not contacts:
-        print("Your address book is empty.")
-        return
-    print(f"\nYour contact list (page {current_page + 1} of {total_pages}):")
-    for record in contacts:
-        print("-" * 30)
-        print(record)
-    print("-" * 30)
-    if total_pages > 1:
-        if current_page == 0:
-            print("You're on the first page. Type 'next' to go forward.")
-        elif current_page == total_pages - 1:
-            print("You're on the last page. Type 'prev' to go back.")
-        else:
-            print("Type 'next' or 'prev' to switch pages.")
 
-def next_page(book):
-    global current_page, contacts_per_page
-    _, total_pages = get_contacts_for_page(book, current_page, contacts_per_page)
-    if current_page < total_pages - 1:
-        current_page += 1
-        show_all_with_pagination(book)
-    else:
-        print("You're already on the last page.")
+COMMANDS["?"] = COMMANDS["help"]
+COMMANDS["commands"] = COMMANDS["help"]
 
-def prev_page(book):
-    global current_page
-    if current_page > 0:
-        current_page -= 1
-        show_all_with_pagination(book)
-    else:
-        print("You're already on the first page.")
+EXIT_COMMANDS = {"exit", "close"}
 
 def run_cli():
     book = load_data()
     print("Welcome to the assistant bot!")
     try:
         while True:
+
             user_input = input("Enter a command: ").strip().casefold()
             if len(user_input) < 1:
-                print("Too few arguments were given. Use 'help' for additional info.")
+                print(f"{Fore.RED}Too few arguments were given.{Fore.RESET} Use {Fore.GREEN}'help'{Fore.RESET} for additional info.")
                 continue
 
             command, args = parse_input(user_input)
-            match command:
-                case "hello":
-                    print("How can I help you?")
-                case "add":
-                    add_contact(args, book)
-                case "change":
-                    change_contact(args, book)
-                case "phone":
-                    show_phone(args, book)
-                case "remove":
-                    remove_phone(args, book)
-                case "all":
-                    # Показуємо сторінку з пагінацією
-                    show_all_with_pagination(book)
-                case "next":
-                    next_page(book)
-                case "prev":
-                    prev_page(book)
-                case "add-birthday":
-                    add_birthday(args, book)
-                case "change-birthday":
-                    change_birthday(args, book)
-                case "show-birthday":
-                    show_birthday(args, book)
-                case "birthdays":
-                    birthdays(args, book)
-                case "add-email":
-                    add_email(args, book)
-                case "change-email":
-                    change_email(args, book)
-                case "show-email":
-                    show_email(args, book)
-                case "remove-email":
-                    remove_email(args, book)
-                case "emails":
-                    emails(book)
-                case "add-address":
-                    add_address(args, book)
-                case "change-address":
-                    change_address(args, book)
-                case "show-address":
-                    show_address(args, book)
-                case "delete":
-                    delete_record(args, book)
-                case "add-note":
-                    add_note(args, book)
-                case "show-note":
-                    show_note(args, book)     
-                case "remove-note":
-                    remove_note(args, book)    
-                case "edit-note":
-                    edit_note(args, book)
-                case "find-note":
-                    find_note(args, book)
-                case "find-by-tags":
-                    find_by_tags(args, book)
-                case "close" | "exit":
-                    save_data(book)
-                    print("Goodbye!")
-                    break
-                case "help":
-                    print(
-"""The following commands are available:
-    * add [username] [phone_number] - add a contact to the contact list. note: phone number must consist of 10 digits
-    * change [username] [old_phone_number] [new_phone_number] - change an already existing contact
-    * phone [username] - get to know a phone number by the contact's username
-    * remove [username] [phone_number] - remove phone number from a person's record
-    * add-birthday [username] [birthday] - set a birthday date for a contact
-    * change-birthday [username] [new_birthday] - change birthday date for a contact
-    * show-birthday [username] - get to know the birthday date of the contact
-    * birthdays - get to know birthdays from your address book for upcoming week
-    * add-email [username] [email] - add an email address to a contact record
-    * change-email [username] [old_email] [new_email] - change given email address of a contact
-    * remove-email [username] [email] - remove an already existing email address from a contact record
-    * show-email [username] - get to know an email address for a given contact
-    * emails - get to know all the emails saved in your contact book   
-    * add-note [username] [title] [text] [tags...] - add a note to a contact (tags can be individual words or ["tag1,tag2"] format)
-    * show-note [username] - show a contact's note
-    * edit-note [username] [title] [text] [tags...] - edit a contact's note (tags are optional)
-    * remove-note [username] - remove a contact's note
-    * find-note [query] - search for notes containing the query text
-    * add-address [name] [address] - add a residential address to a contact record 
-    * change-address [name] [new_address] - change the residential address for a contact record 
-    * show-address [name] - get to know the residential address of a contact
-    * find-by-tags [tag1] [tag2] ... - search for notes with specific tags
-    * search [name] - search for contacts by name (partial match)
-    * delete [name] - delete a record
-    * all - get all contacts from the contact list (5 per page; use 'next'/'prev' for pagination)
-    * next - go to next page of contacts
-    * prev - go to previous page of contacts
-    * exit - close the program
-    * close - close the program"""
-                    )
-                case _:
-                    print("Unknown command was given. Use 'help' for additional info.")
+
+            if command in EXIT_COMMANDS:
+                save_data(book)
+                print(f"{Fore.YELLOW}Goodbye!{Fore.RESET}")
+                break
+            
+            handler = COMMANDS.get(command)
+
+            if handler:
+                handler(args, book)
+            else:
+                print(f"{Fore.RED}Unknown command was given.{Fore.RESET} Use {Fore.GREEN}'help'{Fore.RESET} for additional info.")
     except KeyboardInterrupt:
         save_data(book)
